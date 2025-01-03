@@ -1,13 +1,28 @@
+import "@/core/load-data";
+
 Bun.serve({
-  fetch(req: Request) {
-    const urlContent = new URL(req.url)
-    const pathname = urlContent.pathname; 
-    const method = req.method; 
+  fetch(req: Request, server) {
+    const success = server.upgrade(req);
     
-    if (pathname === "/startGame") {
-        console.log(req.method)
+    if (success) {
+      return undefined;
     }
 
-    return new Response("coco")
-  }
+    const urlContent = new URL(req.url);
+    const pathname = urlContent.pathname;
+    const method = req.method;
+
+    if (pathname === "/startGame") {
+      return new Response("Game started");
+    }
+
+    return new Response("Route not found", { status: 404 });
+  },
+
+  websocket: {
+    async message(ws, message) {
+      console.log(`Message reçu: ${message}`);
+      ws.send(`Message envoyé au client`);
+    },
+  },
 });
